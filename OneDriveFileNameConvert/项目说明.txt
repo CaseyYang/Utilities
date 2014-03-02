@@ -1,0 +1,4 @@
+﻿SkyDrive下载文件后，若原文件名中含有中文（或其他非英语字符），则下载的文件会被自动重命名，同时包含一个Encoding Errors.txt文件，里面会以Original File Name  ->  New File Name的形式标出新旧文件名的关系。
+本程序的作用就是通过读取Encoding Errors.txt把下载文件的文件名复原。
+用法：
+SkyDrive上下载的压缩包解包后，不要移动任何文件，把程序放在与Encoding Errors.txt同一目录下，运行即可。在Encoding Errors所在文件夹的上层目录下会出现一个名为“文件名复原”的文件夹，所有下载的文件（包括那些文件名没有问题的文件）都会按原目录结构出现在该文件夹下。
