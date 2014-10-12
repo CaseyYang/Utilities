@@ -9,9 +9,19 @@ namespace WeChatLogAnalysis
 {
     class Program
     {
+        /// <summary>
+        /// User1：男方；User2：女方
+        /// </summary>
         static string User1 = "杨恺希", User2 = "解戎";
         static SortedList<DateTime, List<ChatWord>> chatLogs = new SortedList<DateTime, List<ChatWord>>();
         static SortedList<DateTime, List<ChatDialogue>> chatDialogues = new SortedList<DateTime, List<ChatDialogue>>();
+        /// <summary>
+        /// 处理单条聊天记录：找出其时间戳；发送方和聊天内容
+        /// </summary>
+        /// <param name="rawStr">单条聊天记录原始字符串</param>
+        /// <param name="timeStamp">时间戳</param>
+        /// <param name="user">发送方</param>
+        /// <param name="chatContent">聊天内容</param>
         static void ProcessRawLog(string rawStr, ref DateTime timeStamp, ref string user, ref string chatContent)
         {
             int index = rawStr.IndexOf('：');
@@ -31,6 +41,11 @@ namespace WeChatLogAnalysis
                 timeStamp = new DateTime(Int32.Parse(dateStr[0]), Int32.Parse(dateStr[1]), Int32.Parse(dateStr[2]), Int32.Parse(dateStr[3]), Int32.Parse(dateStr[4]), Int32.Parse(dateStr[5]));
             }
         }
+        /// <summary>
+        /// 读入微信聊天记录，并保存至集合chatLogs和集合chatDialogues中
+        /// </summary>
+        /// <param name="filePath">聊天记录文件路径</param>
+        /// <returns>读取成功返回true；聊天记录中有错即返回false</returns>
         static bool ReadInWeChatLog(string filePath)
         {
             StreamReader fReader = new StreamReader(filePath, System.Text.Encoding.Default);
@@ -66,7 +81,12 @@ namespace WeChatLogAnalysis
             ChatDialogue.CovertChatLogsToDialogue(ref chatLogs, ref chatDialogues, 60);
             return true;
         }
-        static void AverageChatCountBasedOnChatLogs(string filePath)
+        /// <summary>
+        /// 按天统计女方发送消息数量并输出至给定路径的文件
+        /// 文件格式：日期\t女方发送消息数量
+        /// </summary>
+        /// <param name="filePath">输出文件路径</param>
+        static void User2ChatCountPerDay(string filePath)
         {
             StreamWriter fWriter = new StreamWriter(filePath);
             foreach (var dialogue in chatLogs)
@@ -84,7 +104,12 @@ namespace WeChatLogAnalysis
             }
             fWriter.Close();
         }
-        static void AverageEmotionCountBasedOnChatLogs(string filePath)
+        /// <summary>
+        /// 按天统计女方发送消息中包含的情绪符号数量并输出至给定路径的文件
+        /// 文件格式：日期\t女方发送消息中包含的情绪符号数量
+        /// </summary>
+        /// <param name="filePath">输出文件路径</param>
+        static void User2EmotionCountPerDay(string filePath)
         {
             StreamWriter fWriter = new StreamWriter(filePath);
             foreach (var dayLogs in chatLogs)
@@ -102,7 +127,12 @@ namespace WeChatLogAnalysis
             }
             fWriter.Close();
         }
-        static void AverageExpressionCountBasedOnChatLogs(string filePath)
+        /// <summary>
+        /// 按天统计女方发送消息中包含的表情数量并输出至给定路径的文件
+        /// 文件格式：日期\t女方发送消息中包含的表情数量
+        /// </summary>
+        /// <param name="filePath">输出文件路径</param>
+        static void ExpressionCountBasedOnChatLogs(string filePath)
         {
             StreamWriter fWriter = new StreamWriter(filePath);
             foreach (var dialogue in chatLogs)
@@ -120,6 +150,11 @@ namespace WeChatLogAnalysis
             }
             fWriter.Close();
         }
+        /// <summary>
+        /// 按天统计对话长度及女方发送消息数量并输出至给定路径的文件
+        /// 文件格式：日期\t当天对话数量\t当天平均对话长度\t女方平均发送消息数量
+        /// </summary>
+        /// <param name="filePath">输出文件路径</param>
         static void AverageDialogueLengthPerDay(string filePath)
         {
             StreamWriter fWriter = new StreamWriter(filePath);
@@ -145,49 +180,45 @@ namespace WeChatLogAnalysis
             }
             fWriter.Close();
         }
-        static void AverageDialogueLengthPerDialogue(string filePath)
+        /// <summary>
+        /// 按对话统计并输出至给定路径的文件
+        /// 统计信息：对话长度；女方发送消息数量；女方发送消息中情绪符号数量；女方发送消息中表情数量；女方发送消息平均长度
+        /// 文件格式：对话开始时间\t对话长度\t女方发送消息数量\t女方发送消息中情绪符号数量\t女方发送消息中表情数量\t女方发送消息平均长度
+        /// </summary>
+        /// <param name="filePath">输出文件路径</param>
+        static void StatisticsPerDialogue(string filePath)
         {
             StreamWriter fWriter = new StreamWriter(filePath);
+            fWriter.WriteLine("对话开始时间\t对话长度\t女方发送消息数量\t女方发送消息中情绪符号数量\t女方发送消息中表情数量\t女方发送消息平均长度");
             foreach (var dialoguesOneDay in chatDialogues)
             {
                 foreach (var dialogue in dialoguesOneDay.Value)
                 {
-                    fWriter.Write(dialogue.startTimeStamp + "\t" + dialogue.chatWords.Count + "\t");
-                    int user2WordsCount = 0;
+                    fWriter.Write(dialogue.startTimeStamp + "\t" + dialogue.chatWords.Count + "\t");//对话开始时间和对话长度
+                    int user2WordsCount = 0;//女方发送消息数量
+                    int user2EmotionCount = 0;//女方发送消息中情绪符号数量
+                    int user2ExpressionCount = 0;//女方发送消息中表情数量
+                    double user2AverageWordLength = 0;
                     foreach (var word in dialogue.chatWords)
                     {
                         if (word.user.Equals(User2))
                         {
                             user2WordsCount++;
+                            user2EmotionCount += word.emotionCount;
+                            user2ExpressionCount += word.expressionCount;
+                            user2AverageWordLength += word.contentLength;
                         }
                     }
-                    double averageUser2Words = (double)user2WordsCount / dialogue.chatWords.Count;
-                    fWriter.Write(averageUser2Words + "\r\n");
+                    user2AverageWordLength /= user2WordsCount;
+                    fWriter.Write(user2WordsCount + "\t" + user2EmotionCount + "\t" + user2ExpressionCount + "\t" + user2AverageWordLength + "\r\n");
                 }
             }
             fWriter.Close();
         }
-        static void AverageEmotionAndExpressionBasedOnDialogues(string filePath)
-        {
-            StreamWriter fWriter = new StreamWriter(filePath);
-            foreach (var dialogues in chatDialogues)
-            {
-                foreach (var dialogue in dialogues.Value)
-                {
-                    int emotionCount = 0;
-                    int expressionCount = 0;
-                    foreach (var log in dialogue.chatWords)
-                    {
-                        emotionCount += log.emotionCount;
-                        expressionCount += log.expressionCount;
-                    }
-                    double averageEmotionBasedOnDialogue = (double)emotionCount / dialogue.chatWords.Count;
-                    double averageExpressionBasedOnDialogue = (double)expressionCount / dialogue.chatWords.Count;
-                    fWriter.WriteLine(dialogue.startTimeStamp + "\t" + averageEmotionBasedOnDialogue + "\t" + averageExpressionBasedOnDialogue);
-                }
-            }
-            fWriter.Close();
-        }
+        /// <summary>
+        /// 按天输出聊天记录至给定路径的文件
+        /// </summary>
+        /// <param name="filePath">输出文件路径</param>
         static void ChatLogToFile(string filePath)
         {
             StreamWriter fWriter = new StreamWriter(filePath);
@@ -201,6 +232,10 @@ namespace WeChatLogAnalysis
             }
             fWriter.Close();
         }
+        /// <summary>
+        /// 按对话输出聊天记录至给定路径的文件
+        /// </summary>
+        /// <param name="filePath">输出文件路径</param>
         static void ChatDialogueToFile(string filePath)
         {
             StreamWriter fWriter = new StreamWriter(filePath);
@@ -216,13 +251,13 @@ namespace WeChatLogAnalysis
         }
         static void Main(string[] args)
         {
-            if (ReadInWeChatLog(@"C:\Users\Casey\Desktop\Project\聊天记录.txt"))
+            if (ReadInWeChatLog(@"D:\Document\Computer\Utilities\WeChatLogAnalysis\聊天记录.txt"))
             {
                 //AverageChatCountBasedOnChatLogs("AvergeLogCount.txt");
                 //AverageEmotionCountBasedOnChatLogs("AvergeEmotionCount.txt");
                 //AverageExpressionCountBasedOnChatLogs("AvergeExpressionCount.txt");
                 //AverageDialogueLengthPerDay("AvergeDialogueLength.txt");
-                AverageDialogueLengthPerDialogue("AvergeDialogueLengthPerDialogue.txt");
+                StatisticsPerDialogue("DialoguesStatistics.txt");
                 //AverageEmotionAndExpressionBasedOnDialogues("AverageEmotion&ExpressionBasedOnDialogue.txt");
                 //ChatDialogueToFile("Dailogue.txt");
                 //ChatLogToFile(@"output.txt");
