@@ -216,6 +216,63 @@ namespace WeChatLogAnalysis
             fWriter.Close();
         }
         /// <summary>
+        /// 判断前后消息是否跨过睡眠时间：是返回true；否返回false
+        /// </summary>
+        /// <param name="user1Hour">前一消息发送小时</param>
+        /// <param name="user2Hour">后一消息发送小时</param>
+        /// <returns></returns>
+        static bool SleepingTime(ref DateTime user1TimeStamp, ref DateTime user2TimeStamp)
+        {
+            if (user1TimeStamp.Hour == 23 || user1TimeStamp.Hour == 22)
+            {
+                if (user2TimeStamp.Date.Equals(user1TimeStamp) || user2TimeStamp.Hour < 2)
+                {
+                    return false;
+                }
+                else
+                {
+                    return true;
+                }
+            }
+            if (user1TimeStamp.Hour < 2)
+            {
+                if (user2TimeStamp.Hour < user1TimeStamp.Hour + 1)
+                {
+                    return false;
+                }
+                else
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+        static void ContinuityStatistics(string filePath)
+        {
+            StreamWriter fWriter = new StreamWriter(filePath);
+
+            DateTime lastTimeStamp = DateTime.Today;
+            ChatWord lastChatWord = new ChatWord();
+            foreach (var logsOneDay in chatLogs)
+            {
+                double timeSpan = 0;
+                int crossCount = 0;
+                foreach (var log in logsOneDay.Value)
+                {
+                    if (!lastTimeStamp.Equals(DateTime.Today) && lastChatWord.user.Equals(User1) && log.user.Equals(User2) && !SleepingTime(ref lastChatWord.timeStamp, ref log.timeStamp))
+                    {
+                        timeSpan += (log.timeStamp - lastChatWord.timeStamp).TotalMinutes;
+                        crossCount++;
+                    }
+                    lastChatWord = log;
+                    lastTimeStamp = log.timeStamp;
+                }
+                timeSpan /= crossCount;
+                fWriter.WriteLine(logsOneDay.Key.ToShortDateString() + "\t" + timeSpan);
+            }
+            fWriter.Close();
+        }
+        /// <summary>
         /// 按天输出聊天记录至给定路径的文件
         /// </summary>
         /// <param name="filePath">输出文件路径</param>
@@ -257,7 +314,8 @@ namespace WeChatLogAnalysis
                 //AverageEmotionCountBasedOnChatLogs("AvergeEmotionCount.txt");
                 //AverageExpressionCountBasedOnChatLogs("AvergeExpressionCount.txt");
                 //AverageDialogueLengthPerDay("AvergeDialogueLength.txt");
-                StatisticsPerDialogue("DialoguesStatistics.txt");
+                //StatisticsPerDialogue("DialoguesStatistics.txt");
+                ContinuityStatistics("Continuity.txt");
                 //AverageEmotionAndExpressionBasedOnDialogues("AverageEmotion&ExpressionBasedOnDialogue.txt");
                 //ChatDialogueToFile("Dailogue.txt");
                 //ChatLogToFile(@"output.txt");

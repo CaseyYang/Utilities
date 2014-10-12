@@ -27,6 +27,11 @@ namespace WeChatLogAnalysis
             this.expressionSignal = SetExpression();
             this.emotionSignal = SetEmotion();
         }
+
+        public ChatWord()
+        {
+            // TODO: Complete member initialization
+        }
         private int SetContentLength()
         {
             this.contentLength = this.chatContent.Length;
