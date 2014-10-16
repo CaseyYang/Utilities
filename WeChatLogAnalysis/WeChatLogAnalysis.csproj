@@ -70,6 +70,7 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="聊天记录-范丽娜.txt" />
     <Content Include="聊天记录-解戎.txt" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
