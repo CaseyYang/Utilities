@@ -2,14 +2,18 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Xml.Serialization;
 using WeChatLogAnalysis;
 
 namespace WeChatLogAnalysis
 {
-    class ChatDialogue
+    public class ChatDialogue
     {
+        [XmlAttribute("对话开始时间")]
         public DateTime startTimeStamp;
+        [XmlArrayAttribute()]
         public List<ChatWord> chatWords;
+        public ChatDialogue() { }
         public ChatDialogue(DateTime time)
         {
             this.startTimeStamp = time;

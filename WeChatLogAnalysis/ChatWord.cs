@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Serialization;
 
 namespace WeChatLogAnalysis
 {
@@ -10,13 +11,21 @@ namespace WeChatLogAnalysis
     {
         static string expressionMark = "[表情-";
         static string[] emotionMarks = { "！", "!", "?", "？" };
+        [XmlAttribute("时间")]
         public DateTime timeStamp;
+        [XmlElementAttribute()]
         public string chatContent;
+        [XmlIgnoreAttribute]
         public int contentLength;
+        [XmlAttribute("发送人")]
         public string user;
+        [XmlIgnoreAttribute]
         public bool expressionSignal;
+        [XmlIgnoreAttribute]
         public int expressionCount;
+        [XmlIgnoreAttribute]
         public bool emotionSignal;
+        [XmlIgnoreAttribute]
         public int emotionCount;
         public ChatWord(DateTime time, string user, string content)
         {

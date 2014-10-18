@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Serialization;
 
 namespace WeChatLogAnalysis
 {
@@ -247,7 +248,14 @@ namespace WeChatLogAnalysis
             }
             return false;
         }
-        static void ContinuityStatistics(string filePath)
+        /// <summary>
+        /// 计算聊天连续度并输出至给定路径的文件
+        /// 聊天连续度定义为：在前一条聊天记录为用户1（男方）所发情况下，后面第一条用户2（女方）回复的聊天记录出现的平均间隔时间
+        /// 
+        /// 文件格式：聊天起始时间\t聊天条数时间比
+        /// </summary>
+        /// <param name="filePath">输出文件路径</param>
+        static void ContinuityStatistic(string filePath)
         {
             StreamWriter fWriter = new StreamWriter(filePath);
 
@@ -296,28 +304,41 @@ namespace WeChatLogAnalysis
         static void ChatDialogueToFile(string filePath)
         {
             StreamWriter fWriter = new StreamWriter(filePath);
-            foreach (var chatDialogue in chatDialogues)
+            foreach (var dialoguesPreDay in chatDialogues)
             {
                 //fWriter.WriteLine(chatDialogue.Key.ToShortDateString());
-                foreach (var dialogue in chatDialogue.Value)
+                foreach (var dialogue in dialoguesPreDay.Value)
                 {
                     fWriter.WriteLine(dialogue.ToString());
                 }
             }
             fWriter.Close();
         }
+        static void ChatDialogueToXmlFile(string filePath)
+        {
+            List<ChatDialogue> allDialogues = new List<ChatDialogue>();
+            foreach (var dialoguesPreDay in chatDialogues)
+            {
+                foreach(var dialogue in dialoguesPreDay.Value){
+                    allDialogues.Add(dialogue);
+                }
+            }
+            StreamWriter xmlWriter = new StreamWriter(filePath);
+            XmlSerializer sr = new XmlSerializer(allDialogues.GetType());
+            sr.Serialize(xmlWriter, allDialogues);
+            xmlWriter.Close();
+        }
         static void Main(string[] args)
         {
-            if (ReadInWeChatLog(@"D:\Document\Computer\Utilities\WeChatLogAnalysis\聊天记录.txt"))
+            User1 = "杨恺希";
+            User2 = "范丽娜";
+            if (ReadInWeChatLog(@"../../聊天记录-" + User2 + ".txt"))
             {
-                //AverageChatCountBasedOnChatLogs("AvergeLogCount.txt");
-                //AverageEmotionCountBasedOnChatLogs("AvergeEmotionCount.txt");
-                //AverageExpressionCountBasedOnChatLogs("AvergeExpressionCount.txt");
                 //AverageDialogueLengthPerDay("AvergeDialogueLength.txt");
-                //StatisticsPerDialogue("DialoguesStatistics.txt");
-                ContinuityStatistics("Continuity.txt");
-                //AverageEmotionAndExpressionBasedOnDialogues("AverageEmotion&ExpressionBasedOnDialogue.txt");
-                //ChatDialogueToFile("Dailogue.txt");
+                //StatisticsPerDialogue("DialoguesStatistics-解戎.txt");
+                //ContinuityStatistic("ContinuityStatistic-" + User2 + ".txt");
+                ChatDialogueToFile("Dailogue-" + User2 + ".txt");
+                ChatDialogueToXmlFile("Dailogue-" + User2 + ".xml");
                 //ChatLogToFile(@"output.txt");
             }
         }
