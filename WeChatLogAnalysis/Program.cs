@@ -331,7 +331,7 @@ namespace WeChatLogAnalysis
         static void Main(string[] args)
         {
             User1 = "杨恺希";
-            User2 = "范丽娜";
+            User2 = "解戎";
             if (ReadInWeChatLog(@"../../聊天记录-" + User2 + ".txt"))
             {
                 //AverageDialogueLengthPerDay("AvergeDialogueLength.txt");
