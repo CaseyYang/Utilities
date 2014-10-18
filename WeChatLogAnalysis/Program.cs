@@ -337,8 +337,8 @@ namespace WeChatLogAnalysis
                 //AverageDialogueLengthPerDay("AvergeDialogueLength.txt");
                 //StatisticsPerDialogue("DialoguesStatistics-解戎.txt");
                 //ContinuityStatistic("ContinuityStatistic-" + User2 + ".txt");
-                ChatDialogueToFile("Dailogue-" + User2 + ".txt");
-                ChatDialogueToXmlFile("Dailogue-" + User2 + ".xml");
+                //ChatDialogueToFile("Dailogues-" + User2 + ".txt");
+                ChatDialogueToXmlFile("Dailogues-" + User2 + ".xml");
                 //ChatLogToFile(@"output.txt");
             }
         }
